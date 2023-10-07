@@ -1,0 +1,6 @@
+{
+    "Dawson":{
+        "password":"password",
+        "sessions":["Session1","Session2"]
+    }
+}

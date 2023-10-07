@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./stylesheet.css">
+    <title>From Blender to Three.js</title>
+
+    
+</head>
+<body>
+  
+  <div id="topnav" class="topnav">
+    <a  href="./session/session.html" style="display: none;">Click me</a>
+    <a class="active" href="#home">Home</a>
+    <a href="#news">News</a>
+    <div class="topnav-right">
+      <button id="login">Login</button>
+    </div>
+  </div>
+  <!-- Draggable DIV -->
+<div id="mydiv">
+  <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+
+
+  <div id="Todo">
+    <dl>
+      <dt>TODO List</dt>
+      <dd>- items wanted</dd>
+      <dt>Login functionality</dt>
+      <dd>- Be able to login, and have user specific items displayed</dd>
+      <dd>- This would include session specific to the player</dd>
+      <dt>Session managment</dt>
+      <dd>- Implement session, (socket.io) and create a folder for the session on the server</dd>
+      <dt>Session Host customization</dt>
+      <dd>- If a user is a host of a session, allow them to be able to configure some settings</dd>
+      <dt>Add a configuration file per session</dt>
+      <dd>- This config file will most likely be a json/xml file and will contain general content for the session</dd>
+      <dd>- It will be read in upon start of the session and most content will be avalable through global variables of the session</dd>
+    </dl>
+  </div>
+</div>
+<script type="module">
+  //Make the DIV element draggagle:
+  dragElement(document.getElementById("mydiv"));
+  
+  function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById(elmnt.id + "header")) {
+      /* if present, the header is where you move the DIV from:*/
+      document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+    } else {
+      /* otherwise, move the DIV from anywhere inside the DIV:*/
+      elmnt.onmousedown = dragMouseDown;
+    }
+  
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+    }
+  
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+  
+    function closeDragElement() {
+      /* stop moving when mouse button is released:*/
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  }
+  /*
+  startSession.addEventListener('click',function () {
+
+
+    fetch('http://localhost:3000/api/receiveData', { // Use the correct port for the back-end server
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ key: ['add',sessionName.value] }), // Send your data here
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('HTTP error, status = ' + response.status);
+            }
+            return response.json();
+          })
+          .then(data => {
+
+            console.log(data); // Response from the server
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+          });
+
+    
+
+});
+*/
+  document.getElementById('login').addEventListener('click',function() {
+          
+    fetch('http://localhost:3001/api/loginRequest', { // Use the correct port for the back-end server
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ key: ['login',"Dawson","password"] }), // Send your data here
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('HTTP error, status = ' + response.status);
+            }
+            return response.json();
+          })
+          .then(data => {
+                //Create container for all elements on the right hand side
+                const container = document.createElement("div");
+                container.classList.add('dropdown');
+                var temp = document.getElementById("topnav");
+                temp.appendChild(container);
+
+                const dropButton = document.createElement("button");
+                dropButton.classList.add('dropbtn');
+                dropButton.innerText="Sessions";
+                const dropI = document.createElement("i");
+                dropI.classList.add('fa-caret-down');
+                dropButton.appendChild(dropI);
+                container.appendChild(dropButton);
+
+                const dropdownContent = document.createElement("div");
+                dropdownContent.classList.add('dropdown-content');
+                container.appendChild(dropdownContent);
+                for(var session of data.sessions){
+                  var sessionLink = document.createElement("a");
+                  sessionLink.classList.add('sessionLink');
+                  sessionLink.href='./session/session.html?session='+session;
+                  sessionLink.innerText=session;
+
+                  // Add an event listener to each dynamically created "a" element
+                  sessionLink.addEventListener('click', function(event) {
+                    fetch('http://localhost:3000/api/receiveData', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ key: ['add', session] }),
+                    })
+                      .then(response => {
+                        if (!response.ok) {
+                          throw new Error('HTTP error, status = ' + response.status);
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        console.log(data); // Response from the server
+                        // Handle the response or perform any necessary actions here
+                      })
+                      .catch(error => {
+                        console.error('Fetch Error:', error);
+                      });
+                  });
+
+                  dropdownContent.appendChild(sessionLink);
+                }
+            console.log(data); // Response from the server
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+          });
+  });
+  </script>
+</body>
+</html>

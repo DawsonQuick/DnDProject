@@ -1,0 +1,12 @@
+{
+    "Session1":{
+                "Users":{
+                        "Player1":{
+                            "Position":[2,2,1]   
+                        },
+                        "Player2":{
+                            "Position":[3,5,1]   
+                        }
+                    }
+    }
+}
